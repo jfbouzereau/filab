@@ -1012,6 +1012,7 @@ function FIWarpMatrix() {
 		new FIControlNumber("0"),
 		new FIControlNumber("1"),
 		new FIControlNumber("1"),
+		new FIControlNumber("1"),
 		new FIControlNumber("0")
 	]);
 
@@ -1073,7 +1074,7 @@ FIWarpMerge.prototype = Object.create(FIWarp.prototype);
 
 function FIWarpMonadic() {
 
-	var self = thisl
+	var self = this;
 
 	FIWarp.call(self, [
 		new FIControlMonadic(),
