@@ -118,7 +118,8 @@ function FIControlDiadic() {
 
 	var self = this;
 
-	FIControlList.call(self, ["+","-","*","/","^","mod","min","max","avg"]);
+	FIControlList.call(self, ["+","-","*","/","^","mod","min","max","avg",
+		"bitor","bitxor","bitand"]);
 
 	self.compute = function(a,b) {
 		switch(self.getValue()) {
@@ -131,6 +132,9 @@ function FIControlDiadic() {
 			case 6 : return a<b ? a : b;
 			case 7 : return a>b ? a : b;
 			case 8 : return (a+b)/2;
+			case 9 : return (a|0)|(b|0);
+			case 10: return (a|0)^(b|0);
+			case 11: return (a|0)&(b|0);
 		}
 	}
 }
@@ -254,7 +258,6 @@ function FIFrameSquare() {
 	self.pointProducers = 1;
 
 	self.getPoint = function(_context) {
-		//console.log("FRAME SQUARE "+_context);
 		var width = self.getControl(0).getValue();
 		if(_context.iter==0) {
 			_context.xmin = _context.ymin = -width/2;
@@ -299,7 +302,6 @@ function FIEffectAffine() {
 	self.valueProducers = 1;
 	
 	self.getValue = function(_context) {
-		//console.log("EFFECT AFFINE "+_context);
 		var v = self.getProvider(0).getValue(_context);
 		return self.getControl(0).getValue()*v + 
 				self.getControl(1).getValue();	
@@ -395,7 +397,6 @@ function FIEffectDiadic() {
 	self.valueProducers = 1;
 
 	self.getValue = function(_context) {
-		//console.log("EFFECT DIADIC "+_context);
 		var v1 = self.getProvider(0).getValue(_context);
 		var v2 = self.getProvider(1).getValue(_context);
 		return self.getControl(0).compute(v1,v2);
@@ -682,10 +683,10 @@ function FIImageDiadic() {
 
 		var coord = self.getProvider(0).getPoint(_context);
 
-		var x = self.getControl(0).compute(coord,this.getControl(3).getValue());
-		var y = this.getControl(2).compute(coord,this.getControl(3).getValue());
+		var x = self.getControl(0).compute(coord,self.getControl(3).getValue());
+		var y = self.getControl(2).compute(coord,self.getControl(3).getValue());
 
-		return this.getControl(1).compute(x,y);	
+		return self.getControl(1).compute(x,y);
 	}
 
 }
@@ -1215,9 +1216,42 @@ function FIDisplay(_controls) {
 
 	var self = this;
 
+	var levels = null;
+
 	FIModule.call(self,_controls);
 
-	this.run = function() {}
+	self.run = function()  {
+
+		// compute the gray levels
+
+		var width = self.getControl(0).getValue()|0;
+
+		levels = new Array(width*width);
+
+		var context = new FIContext();
+		context.iter = 0;
+		context.width = width;
+
+		var provider = self.getProvider(0);
+
+		for(let i=0;i<width;i++) {
+			context.ix = i;
+			for(let j=0;j<width;j++) {
+				context.iy = j;
+				var v = provider.getValue(context);
+				if(v<0) v = 0;
+				else if(v>1) v = 1;
+				levels[j*width+i] = 1-v;
+				context.iter++;
+			}
+		}
+
+	}
+	
+	self.getLevels = function() {
+		return levels;	
+	}
+
 }
 
 FIDisplay.prototype = Object.create(FIModule.prototype);
@@ -1228,44 +1262,34 @@ function FIDisplayScreen() {
 
 	var self = this;
 
-	FIDisplay.call(self,[]);
+	FIDisplay.call(self,[
+		new FIControlNumber("500")
+	]);
 
 	self.valueProviders = 1;
 
-	var width = 500;
+	self.help1 = "Display the image in a canvas of witdh {0}";
 
-	var pixels = new Array(width*width);
-
-	self.run = function() {
-		buildImage();
-	}
-
-	self.getPixels = function() {
-		return pixels;
-	}
-
-	function buildImage() {
-
-		var context = new FIContext();
-		context.iter = 0;
-		context.width = width;
-
-		for(let i=0;i<width;i++) {
-			context.ix = i;
-			for(let j=0;j<width;j++) {
-				context.iy = j;
-				var v = self.getProvider(0).getValue(context);
-				if(v<0) v = 0;
-				else if(v>1) v = 1;
-				pixels[j*width+i] = 1-v;
-				context.iter++;
-			}
-		}
-	}
-		
 }
 
 FIDisplayScreen.prototype = Object.create(FIDisplay.prototype);
+
+//****************************************************************************
+
+function FIDisplayFile() {
+
+	var self = this;
+
+	FIDisplay.call(self, [
+		new FIControlNumber("500"),
+		new FIControlList(["PNG","JPEG"])
+	]);
+
+	self.valueProviders = 1;
+
+	self.help1 = "Generate an image file of width {0}";
+	self.help2 = "Type of file : {1}";
+}
 
 //****************************************************************************
 
