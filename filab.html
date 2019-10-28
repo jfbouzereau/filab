@@ -53,6 +53,7 @@ var MOVE_MODULE = ++ACTION;
 var DRAW_BACKLINK = ++ACTION;
 var DRAW_FORLINK = ++ACTION;
 var PRESS_RUN = ++ACTION;
+var PRESS_EXPORT = ++ACTION;
 var SCROLL = ++ACTION;
 
 var TYPES = {
@@ -91,10 +92,9 @@ var hhelp = 100;
 var wmodule = 80;
 var hmodule = 24;
 
-var wbutton = 100
-var hbutton = 30;
-var xbutton = 0;
-var ybutton = 0;
+var rrun = {x:0,y:0,w:100,h:35};
+
+var rexport = {x:0,y:0,w:100,h:35};
 
 window.addEventListener("resize",onresize);
 
@@ -118,6 +118,9 @@ function ondown(event) {
 	xclick = event.clientX;
 	yclick = event.clientY;
 
+	xmove = xclick;
+	ymove = yclick;
+
 	var module = getPaletteModule(xclick,yclick);
 	if(module) {
 		state = {action:ADD_MODULE,type:module.type,name:module.name};
@@ -140,8 +143,14 @@ function ondown(event) {
 		return;
 	}	
 
-	if(inRect(xclick,yclick,xbutton,ybutton,wbutton,hbutton)) {
+	if(inRect(xclick,yclick,rrun)) {
 		state = {action:PRESS_RUN};
+		draw();
+		return;
+	}
+
+	if(inRect(xclick,yclick,rexport)) {
+		state = {action:PRESS_EXPORT};
 		draw();
 		return;
 	}
@@ -257,15 +266,17 @@ function onup(event) {
 			removeLink({from:state.index});
 	}
 
-	var inb = inRect(xmove,ymove,xbutton,ybutton,wbutton,hbutton);
-	if((state.action == PRESS_RUN)&& inb) {
+	if((state.action == PRESS_RUN)&& inRect(xmove,ymove,rrun)) {
 		setTimeout(run,0);
+	}
+
+	if((state.action == PRESS_EXPORT) && inRect(xmove,ymove,rexport)) {
+		setTimeout(exportConfig,0);
 	}
 
 	state = null;
 
 	draw();
-		
 	
 }
 
@@ -389,6 +400,8 @@ function loadConfig(text) {
 
 function exportConfig() {
 
+	if(modules.length==0) return;
+
 	var config = [];
 
 	for(var i=0;i<modules.length;i++) {
@@ -398,7 +411,8 @@ function exportConfig() {
 		r.name = m.name;
 		r.x = m.x;
 		r.y = m.y;
-		
+
+		// count of controls for this module		
 		var nc = 0;
 		while(m.obj.getControl(nc)) nc++;
 
@@ -419,9 +433,9 @@ function exportConfig() {
 		r.providers[-link.part-1] = link.from;
 	}
 
-
 	var t = JSON.stringify(config,"","\n").replace(/\n+/g,"\n");
 
+	// show the config in a new window
 	var options = "height=510;toolbar=no;scrollbars=no";
 	var w = window.open("","config",options);
 	w.document.write('<pre>'+t+'</pre>');
@@ -459,7 +473,13 @@ function draw() {
 	
 	drawLinks();
 
-	drawRunButton();
+	rrun.x = workspace.width - rrun.w - 20;
+	rrun.y = workspace.height - 5*hhelp/7 - rrun.h/2;
+	drawButton("Run",rrun,PRESS_RUN);
+
+	rexport.x = workspace.width - rexport.w - 20;
+	rexport.y = workspace.height - 2*hhelp/7 -rexport.h/2;
+	drawButton("Export",rexport,PRESS_EXPORT);
 
 	function drawLink() {
 		ctx.lineWidth = 1;
@@ -494,28 +514,25 @@ function draw() {
 		}
 	}
 
-	function drawRunButton() {
+	function drawButton(title,r,action) {
 		ctx.save();
 		ctx.textAlign = "center";
 		ctx.font = "16px Sans-Serif";
 		ctx.lineWidth = 1;
 
-		xbutton = workspace.width - wbutton - 20;
-		ybutton = workspace.height - hhelp/2 - hbutton/2;
+		var inb = inRect(xmove,ymove,r);
 
-		var inb = inRect(xmove,ymove,xbutton,ybutton,wbutton,hbutton);
-
-		if(state && (state.action==PRESS_RUN) && inb ) 
+		if(state && (state.action==action) && inb ) 
 			ctx.fillStyle = "#333";
 		else
 			ctx.fillStyle = "#AAA";
-		ctx.fillRect(xbutton,ybutton,wbutton,hbutton);
+		ctx.fillRect(r.x,r.y,r.w,r.h);
 	
-		if(state && (state.action == PRESS_RUN)	&& inb) 
+		if(state && (state.action == action)	&& inb) 
 			ctx.fillStyle = "#AAA";
 		else
 			ctx.fillStyle = "#333";
-		ctx.fillText("Run",xbutton+wbutton/2,ybutton+20);
+		ctx.fillText(title,r.x+r.w/2,r.y+22);
 		ctx.restore();
 	}
 
@@ -712,12 +729,12 @@ function clearControls() {
 
 // ************************************************************************
 
-function inRect(x,y,rx,ry,rw,rh) {
+function inRect(x,y,r) {
 
-	if(x<rx) return false;
-	if(x>rx+rw) return false;
-	if(y<ry) return false;
-	if(y>ry+rh) return false;
+	if(x<r.x) return false;	
+	if(x>r.x+r.w) return false;
+	if(y<r.y) return false;
+	if(y>r.y+r.h) return false;
 	return true;
 
 }
@@ -782,8 +799,8 @@ function getWorkspaceModule(xclick,yclick) {
 		var module = modules[i];
 		if(xclick < module.x - wmodule/2) continue;
 		if(xclick > module.x + wmodule/2) continue;
-		if(yclick < module.y-8 - hmodule/2) continue;
-		if(yclick > module.y+8 + hmodule/2) continue;
+		if(yclick < module.y-6 - hmodule/2) continue;
+		if(yclick > module.y+6 + hmodule/2) continue;
 		return i;
 	}
 }
@@ -793,11 +810,11 @@ function getWorkspaceModule(xclick,yclick) {
 function getModulePart(xclick,yclick,module) {
 
 	// in provider 
-	if(yclick<module.y - hmodule/2 + 8) {
+	if(yclick<module.y - hmodule/2 + 6) {
 		if(module.obj.valueProviders==1)
-			return -1;
+			return Math.abs(xclick-module.x)< 6 ? -1 : 0;
 		else if(module.obj.pointProviders==1)
-			return -1;
+			return Math.abs(xclick-module.x)< 6 ? -1 : 0;
 		else if(module.obj.valueProviders==2)
 			return xclick < module.x ? -1 : -2;
 		else if(module.obj.pointProviders==2)
@@ -805,7 +822,9 @@ function getModulePart(xclick,yclick,module) {
 	}
 
 	// in producer
-	if(yclick>module.y + hmodule/2-8) return 1;
+	if(yclick>module.y + hmodule/2-6) 
+			return Math.abs(xclick-module.x)< 6 ? 1 : 0;
+
 
 	return 0;
 }
