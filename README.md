@@ -1,5 +1,4 @@
-# filab
-Fonctional Images
+# Fonctional Images
 
 This little laboratory is inspired by Conal Elliot's paper
 [Functional Images](http://conal.net/papers/functional-images/)
@@ -16,17 +15,15 @@ To achieve this, a graph is made of modules connected together.
 
 There are 5 types of modules :
 
-* Frame : the module generates the 2D points
+* Frame : a module that generates 2D points
 
-* Warp : the module transform the 2D points
+* Warp : a module that transforms the 2D points
 
-* Image : the module convert the 2D points into gray level
+* Image : a module that converts the 2D points into gray level
 
-* Effect : the module transform the gray level
+* Effect : a module that transforms the gray level
 
-* Display : the module produces an image
-
-A valid graph must start with at least one Frame module, and end with a Display module.
+* Display : a module that produces an image
 
 ## USAGE
 
@@ -34,7 +31,17 @@ A valid graph must start with at least one Frame module, and end with a Display 
 to the work space.
 
 * To set a link between two modules, click on one connector and drag a line to another one. Round connectors represent 2D points. Square connectors
-represent gray level values. You can only set a link between connectors of the same nature.
+represent gray level values. You can only set a link between connectors of the same kind.
+
+* From a bottom connector (producer), you can draw many links.
+
+* A top connector (provider) can receive only one link.
+
+* To remove a link, draw a line from the top connector to nothing.
+
+* To scroll the workspace, click in the background and drag.
+
+* A valid graph must start with at least one Frame module, and end with a Display module. Modules not connected to the graph are ignored.
 
 ![config24](config24.png)
 
