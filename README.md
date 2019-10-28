@@ -42,6 +42,8 @@ represent gray level values. You can only set a link between connectors of the s
 
 ![result24](result24.png)
 
+![result23](result23.png)
+
 ## EXPORT
 
 You can export the graph into a json file.

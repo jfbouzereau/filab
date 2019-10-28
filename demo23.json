@@ -1,0 +1,200 @@
+[
+{
+"type": "Frame",
+"name": "Square",
+"id": "fr1",
+"x": 276,
+"y": 35,
+"controls": [
+"20"
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im1",
+"x": 104,
+"y": 118,
+"controls": [
+"2",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im2",
+"x": 504,
+"y": 129,
+"controls": [
+"2",
+"1"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im3",
+"x": 219,
+"y": 118,
+"controls": [
+"0",
+"1"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im4",
+"x": 374,
+"y": 123,
+"controls": [
+"0",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef1",
+"x": 128,
+"y": 174,
+"controls": [
+"0"
+],
+"providers": [
+1,
+3
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef2",
+"x": 479,
+"y": 185,
+"controls": [
+"0"
+],
+"providers": [
+4,
+2
+]
+},
+{
+"type": "Effect",
+"name": "Monadic",
+"id": "ef3",
+"x": 128,
+"y": 223,
+"controls": [
+"2"
+],
+"providers": [
+5
+]
+},
+{
+"type": "Effect",
+"name": "Monadic",
+"id": "ef4",
+"x": 479,
+"y": 236,
+"controls": [
+"2"
+],
+"providers": [
+6
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef5",
+"x": 152,
+"y": 280,
+"controls": [
+"0"
+],
+"providers": [
+7,
+4
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef6",
+"x": 454,
+"y": 287,
+"controls": [
+"0"
+],
+"providers": [
+3,
+8
+]
+},
+{
+"type": "Effect",
+"name": "Monadic",
+"id": "ef7",
+"x": 152,
+"y": 334,
+"controls": [
+"2"
+],
+"providers": [
+9
+]
+},
+{
+"type": "Effect",
+"name": "Monadic",
+"id": "ef8",
+"x": 454,
+"y": 337,
+"controls": [
+"9"
+],
+"providers": [
+10
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef9",
+"x": 300,
+"y": 366,
+"controls": [
+"0"
+],
+"providers": [
+11,
+12
+]
+},
+{
+"type": "Display",
+"name": "Screen",
+"id": "di1",
+"x": 301,
+"y": 430,
+"providers": [
+13
+]
+}
+]
