@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body {
+	margin:0px;
+	padding:0px;
+}
+</style>
+</head>
+<body>
+<canvas id="workspace">
+</body>
+<script type="template" id="display">
+	document.body.style.margin = "0px";
+	document.body.style.padding = "0px";
+	document.body.style.backgroundColor = "#F8F8F8";
+
+	var div = document.createElement("div");
+	div.style.position = "fixed";
+	div.style.left = "0px";
+	div.style.top = "0px";
+	div.style.width = "100%";
+	div.style.height = "100%";
+	div.style.display = "flex";
+	div.style.justifyContent = "center";
+	div.style.alignItems = "center";
+	document.body.appendChild(div);
+	
+	var canvas = document.createElement("canvas");
+	canvas.width = 500;
+	canvas.height = 500;		
+	canvas.style.border = "1px solid black";
+
+	div.appendChild(canvas);
+
+	var ctx = canvas.getContext("2d");
+
+	window.opener.remoteupdate = function(imgdata) {
+		ctx.putImageData(imgdata,0,0);
+	}
+
+</script>
+<script src="filab.js"></script>
+<script>
+
+// ************************************************************************
+
+var ACTION = 0;
+var ADD_MODULE = ++ACTION;
+var MOVE_MODULE = ++ACTION;
+var DRAW_BACKLINK = ++ACTION;
+var DRAW_FORLINK = ++ACTION;
+var PRESS_RUN = ++ACTION;
+
+
+var TYPES = {
+	"Frame":{color:hsv(0,0.4,1),modules:["Square"]},
+	"Warp":{color:hsv(9/15,0.4,1),modules:["Affine","Compare","Diadic",
+		"Matrix","Merge","Monadic","Polar","Rect","Rotate"]},
+	"Image":{color:hsv(6/15,0.4,1),modules:["Affine","Checker","Compare",
+		"Constant","Diadic","Interpol","Monadic","Parity","Range"]},
+	"Effect":{color:hsv(3/15,0.4,1),modules:["Affine","And","Average","Compare",
+		"Diadic","Merge","Or","Monadic","Parity","Xor"]},
+	"Display":{color:hsv(12/15,0.4,1),modules:["Screen"]}
+	};
+
+
+// ************************************************************************
+
+
+var workspace = document.querySelector("#workspace");
+var ctx = workspace.getContext("2d");
+
+var imodule = -1;		// module being controlled
+var modules = [];
+var links = [];
+
+var icontrol = -1;
+var controls = [{},{},{},{},{},{},{},{}];
+
+var state = null;
+var xclick,yclick,xmove,ymove;
+
+var wpalette = 80;
+var hpalette = 0;
+
+var hhelp = 100;
+
+var wmodule = 80;
+var hmodule = 20;
+
+var wbutton = 100
+var hbutton = 30;
+var xbutton = 0;
+var ybutton = 0;
+
+window.addEventListener("resize",onresize);
+
+document.body.addEventListener("keypress",onkey);
+
+workspace.addEventListener("mousedown",ondown);
+workspace.addEventListener("mousemove",onmove);
+workspace.addEventListener("mouseup",onup);
+
+workspace.addEventListener("dragover",ondrag);
+workspace.addEventListener("drop",ondrop);
+
+draw();
+
+// ************************************************************************
+
+function ondown(event) {
+
+	state = null;
+
+	xclick = event.clientX;
+	yclick = event.clientY;
+
+	var module = getPaletteModule(xclick,yclick);
+	if(module) {
+		state = {action:ADD_MODULE,type:module.type,name:module.name};
+		return;
+	}
+
+	var index = getWorkspaceModule(xclick,yclick);
+	if(index>=0) {
+		var part = getModulePart(xclick,yclick,modules[index]);
+		if(part==0) {
+			state = {action:MOVE_MODULE,index:index};
+			}
+		else if(part<0) {
+			state = {action:DRAW_BACKLINK,index:index,part:part};
+		}
+		else if(part>0) {
+			state = {action:DRAW_FORLINK,index:index};
+		}
+
+		return;
+	}	
+
+	if(inRect(xclick,yclick,xbutton,ybutton,wbutton,hbutton)) {
+		state = {action:PRESS_RUN};
+		draw();
+		return;
+	}
+
+	icontrol = getHelpControl(xclick,yclick);
+	draw();
+	
+}
+
+
+// ************************************************************************
+
+
+function onmove(event) {
+
+	if(!state) return;
+	
+	xmove = event.clientX;
+	ymove = event.clientY;
+
+	if(state && state.action == MOVE_MODULE) {
+		var module = modules[state.index];
+		module.x += (xmove-xclick);
+		module.y += (ymove-yclick);
+		xclick = xmove;
+		yclick = ymove;
+	}
+
+	draw();
+
+}
+
+
+// ************************************************************************
+
+function onup(event) {
+
+	if(!state) return;
+
+	xmove = event.clientX;
+	ymove = event.clientY;
+
+	if(state.action == ADD_MODULE) {
+		if(xmove>wpalette) {
+			state.x = xmove;
+			state.y = ymove;
+
+			try {
+				state.obj = eval("new FI"+state.type+state.name+"()");
+				modules.push(state);
+				imodule = modules.length-1;
+				clearControls();
+				}
+			catch(err) {
+				console.log(err);
+				}
+		}
+	}
+
+	if(state.action == MOVE_MODULE) {
+		if(state.index != imodule ) {
+			imodule = state.index;
+			clearControls();
+		}
+	}
+
+	if(state.action == DRAW_BACKLINK) {
+		var jmodule = getWorkspaceModule(xmove,ymove);
+		if((jmodule>=0)&&(jmodule!=state.index)) {
+			var part = getModulePart(xmove,ymove,modules[jmodule]);	
+			if(part>0) {
+				if(( modules[jmodule].obj.pointProducers==1) &&
+					(modules[state.index].obj.pointProviders>0)) {
+					addLink({from:jmodule,to:state.index,part:state.part});
+				}
+				if( (modules[jmodule].obj.valueProducers==1) &&
+					(modules[state.index].obj.valueProviders>0)) {
+					addLink({from:jmodule,to:state.index,part:state.part});
+				}
+			}
+		} else
+			removeLink({to:state.index,part:state.part});
+	}
+
+	if(state.action == DRAW_FORLINK) {
+		var jmodule = getWorkspaceModule(xmove,ymove);
+		if((jmodule>=0)&&(jmodule!=state.index)) {
+			var part = getModulePart(xmove,ymove,modules[jmodule]);
+			if(part<0) {
+				if(( modules[state.index].obj.pointProducers==1) &&
+					(modules[jmodule].obj.pointProviders>0)) {
+					addLink({from:state.index,to:jmodule,part:part});
+				}
+				if( (modules[state.index].obj.valueProducers==1) &&
+					(modules[jmodule].obj.valueProviders>0)) {
+					addLink({from:state.index,to:jmodule,part:part});
+				} }
+		}
+		else		
+			removeLink({from:state.index});
+	}
+
+	var inb = inRect(xmove,ymove,xbutton,ybutton,wbutton,hbutton);
+	if((state.action == PRESS_RUN)&& inb) {
+		setTimeout(run,0);
+	}
+
+	state = null;
+
+	draw();
+		
+	
+}
+
+
+// ************************************************************************
+
+function onresize() {
+	draw();
+}
+
+// ************************************************************************
+
+function onkey(event) {
+
+	if(icontrol<0) return;	
+
+	var obj = modules[controls[icontrol].mindex].obj;
+
+	var ctl = obj.getControl(icontrol);
+
+	if(ctl instanceof FIControlList) {
+		// every key switch the value in the list
+		ctl.setValue(ctl.getValue()+1);
+	}
+	else {
+		var string = ctl.getString();
+		if(event.keyCode==8) 
+			string = string.substring(0,string.length-1);
+		else if(event.key.match(/[0123456789.-]/))
+			string = string + event.key;
+		ctl.setValue(string);	
+	}
+	
+	draw();	
+}
+
+// ************************************************************************
+
+function ondrag(event) {
+
+		event.preventDefault();
+}
+
+// ************************************************************************
+
+function ondrop(event) {
+
+	event.preventDefault();
+
+	if(event.dataTransfer.items)
+		var file = event.dataTransfer.items[0].getAsFile();
+	else
+		var file = event.dataTransfer.files[0];
+
+	var reader = new FileReader();
+	reader.addEventListener("load",onread);
+	reader.addEventListener("error",onerror);
+	reader.readAsText(file);			
+
+	function onread(event) {
+		
+		loadConfig(event.target.result);
+		
+	}
+
+	function onerror(err) {
+		alert(err);
+	}
+
+}
+
+// ************************************************************************
+
+function loadConfig(text) {
+
+	var config;
+
+	try {
+		config = JSON.parse(text);
+		}
+	catch(err) {
+		alert(err);
+		return;
+	}
+
+	if(!(config instanceof Array)) {
+		alert("Bad content");
+		return;
+	}
+
+	modules = [];
+	imodule = 0;
+
+	clearControls();	
+
+	for(var i=0;i<config.length;i++) {
+		var r = config[i];
+		try { var obj = eval("new FI"+r.type+r.name+"()"); }		
+		catch(err) { alert(err) ; return }
+		var module = {type:r.type,name:r.name,x:r.x,y:r.y,obj:obj};
+		modules.push(module);
+	}
+
+	for(var i=0;i<config.length;i++) {
+		var r = config[i];		
+		var obj = modules[i].obj;
+
+		if(r.controls)
+			for(var j=0;j<r.controls.length;j++) 
+				obj.getControl(j).setValue(r.controls[j]);			
+
+		if(r.providers)
+			for(var j=0;j<r.providers.length;j++)
+				links.push({from:r.providers[j],to:i,part:-j-1});
+	}
+
+	draw();
+}
+
+// ************************************************************************
+
+function exportConfig() {
+
+	var config = [];
+
+	for(var i=0;i<modules.length;i++) {
+		var m = modules[i];
+		var r = {};
+		r.type = m.type;
+		r.name = m.name;
+		r.x = m.x;
+		r.y = m.y;
+		
+		var nc = 0;
+		while(m.obj.getControl(nc)) nc++;
+
+		r.controls = [];
+		for(var ic=0;ic<nc;ic++)
+			r.controls.push(m.obj.getControl(ic).getString());	
+	
+		var suffix = i==modules.length-1 ? '':',';
+
+		config.push(r);
+	}
+
+	for(var i=0;i<links.length;i++) {
+		var link = links[i];
+		var r = config[link.to];
+		if(!r.providers)
+			r.providers = [];
+		r.providers[-link.part-1] = link.from;
+	}
+
+
+	var t = JSON.stringify(config,"","\n").replace(/\n+/g,"\n");
+
+	var options = "height=510;toolbar=no;scrollbars=no";
+	var w = window.open("","config",options);
+	w.document.write('<pre>'+t+'</pre>');
+
+}
+
+// ************************************************************************
+
+function draw() {
+
+	var w = window.innerWidth;
+	var h = window.innerHeight;
+
+	workspace.width = w;
+	workspace.height = h-4;
+
+	ctx.fillStyle = "#F8F8F8";
+	ctx.fillRect(0,0,w,h);
+
+	drawPalette();
+
+	for(var i=0;i<modules.length;i++) 
+		drawModule(modules[i]);
+
+	if(state && state.action==ADD_MODULE) {
+		state.x = xmove;
+		state.y = ymove;
+		drawModule(state);
+	}
+
+	drawHelp();
+
+	if(state && ((state.action==DRAW_BACKLINK)||(state.action==DRAW_FORLINK)))
+		drawLink();
+	
+	drawLinks();
+
+	drawRunButton();
+
+	function drawLink() {
+		ctx.lineWidth = 1;
+		ctx.strokeStyle = "black";
+		ctx.beginPath();
+		ctx.moveTo(xclick,yclick);
+		ctx.lineTo(xmove,ymove);
+		ctx.stroke();
+	}
+
+	function drawLinks() {
+		ctx.fillStyle = "#666";
+		ctx.lineWidth = 1;
+		for(var i=0;i<links.length;i++) {
+			var module1 = modules[links[i].from];		
+			var module2 = modules[links[i].to];
+			var part = links[i].part;
+			var x1 = module1.x + wmodule/2;
+			var y1 = module1.y;
+			var x2 = module2.x - wmodule/2;
+			if((module2.obj.valueProviders==1)||(module2.obj.pointProviders==1))
+				var y2 = module2.y;
+			else if(part==-1)
+				var y2 = module2.y-8;
+			else if(part==-2)
+				var y2 = module2.y+8;
+
+			ctx.beginPath();
+			ctx.moveTo(x1,y1);
+			ctx.lineTo(x2,y2);
+			ctx.stroke();
+		}
+	}
+
+	function drawRunButton() {
+		ctx.save();
+		ctx.textAlign = "center";
+		ctx.font = "16px Sans-Serif";
+		ctx.lineWidth = 1;
+
+		xbutton = workspace.width - wbutton - 20;
+		ybutton = workspace.height - hhelp/2 - hbutton/2;
+
+		var inb = inRect(xmove,ymove,xbutton,ybutton,wbutton,hbutton);
+
+		if(state && (state.action==PRESS_RUN) && inb ) 
+			ctx.fillStyle = "#333";
+		else
+			ctx.fillStyle = "#AAA";
+		ctx.fillRect(xbutton,ybutton,wbutton,hbutton);
+	
+		if(state && (state.action == PRESS_RUN)	&& inb) 
+			ctx.fillStyle = "#AAA";
+		else
+			ctx.fillStyle = "#333";
+		ctx.fillText("Run",xbutton+wbutton/2,ybutton+20);
+		ctx.restore();
+	}
+
+	function drawModule(module) {
+		ctx.textAlign = "center";
+		ctx.font = "14px Sans-Serif";
+		ctx.lineWidth = 0.3;
+
+		ctx.fillStyle = TYPES[module.type].color;
+		ctx.fillRect(module.x-wmodule/2,module.y-hmodule/2,wmodule,hmodule);
+		
+		ctx.strokeStyle = "#666";
+		ctx.strokeRect(module.x-wmodule/2,module.y-hmodule/2,wmodule,hmodule);
+
+		ctx.fillStyle = "#666";
+		ctx.fillText(module.name,module.x,module.y+5);
+
+		if(!module.obj) return;
+
+		ctx.fillStyle = "#999";
+
+		if(module.obj.pointProducers==1) {
+			ctx.beginPath();
+			ctx.arc(module.x+wmodule/2, module.y,5,0,Math.PI*2);
+			ctx.fill();
+		}
+		
+		if(module.obj.pointProviders==1) {
+			ctx.beginPath();
+			ctx.arc(module.x-wmodule/2,module.y,5,0,Math.PI*2);
+			ctx.fill();
+		}
+
+		if(module.obj.pointProviders==2) {
+			ctx.beginPath();
+			ctx.beginPath();
+			ctx.arc(module.x-wmodule/2,module.y-8,5,0,Math.PI*2);
+			ctx.fill();
+			ctx.arc(module.x-wmodule/2,module.y+8,5,0,Math.PI*2);
+			ctx.fill();
+		}
+
+		if(module.obj.valueProducers==1) {
+			ctx.fillRect(module.x+wmodule/2-5,module.y-5,10,10);
+		}
+
+		if(module.obj.valueProviders==1) {
+			ctx.fillRect(module.x-wmodule/2-5,module.y-5,10,10);
+		}
+	
+		if(module.obj.valueProviders==2) {
+			ctx.fillRect(module.x-wmodule/2-5,module.y-5-8,10,10);
+			ctx.fillRect(module.x-wmodule/2-5,module.y-5+8,10,10);
+		}
+	}
+}
+
+
+// ************************************************************************
+
+function drawPalette() {
+
+	ctx.save();
+
+	ctx.textAlign = "center";
+	ctx.font = "14px Sans-Serif";
+	ctx.lineWidth = 0.3;
+
+	var x = 0;
+	var y = 0;
+
+	f("Frame");
+	f("Image");
+	f("Warp");
+	f("Effect");
+	f("Display");
+
+	function f(type) {
+		ctx.fillStyle = "black";
+		ctx.fillRect(x,y,wpalette,20);
+		ctx.fillStyle = TYPES[type].color;
+		ctx.fillText(type,wpalette/2,y+15);
+		ctx.strokeStyle = "#999";
+		ctx.strokeRect(x,y,wpalette,20);
+		y += 20;
+
+		for(var i=0;i<TYPES[type].modules.length;i++) {
+			ctx.fillStyle = TYPES[type].color;
+			ctx.fillRect(x,y,wpalette,20);
+			ctx.fillStyle = "#666";
+			ctx.fillText(TYPES[type].modules[i],wpalette/2,y+15);
+			ctx.strokeStyle = "#999";
+			ctx.strokeRect(x,y,wpalette,20);
+			y += 20;
+		}
+	
+	}
+
+	hpalette = y;
+
+	ctx.restore();
+}
+
+// ************************************************************************
+
+function drawHelp() {
+
+	var placeholder = "XXXXXXXXXX";
+	var ictrl = -1;
+
+	ctx.save();
+
+	ctx.textAlign = "left";
+	ctx.font = "italic 14px Sans-Serif";
+	ctx.lineWidth = 0.3;
+
+	var y = workspace.height-hhelp;
+	ctx.fillStyle = "white";
+	ctx.fillRect(wpalette+1,y,workspace.width-wpalette,workspace.height);
+
+	ctx.strokeStyle = "#666";
+	ctx.strokeRect(wpalette+1,y,workspace.width-wpalette,workspace.height);
+
+	ctx.fillStyle = "#666";
+	if(imodule>=0) {
+		var module = modules[imodule];
+		if(!module.obj) return;
+		var x = wpalette + (workspace.width-wpalette)/2;
+		y += 25;
+		drawHelpLine(module.obj.help1,x,y);
+		y += 25;
+		drawHelpLine(module.obj.help2, x , y);
+		y += 25;
+		drawHelpLine(module.obj.help3, x , y);
+	}
+
+	ctx.font = "14px Courier";
+	ctx.fillStyle = "#666";
+	ctx.textAlign = "center";
+	ctx.lineWidth = 1;
+	for(var i=0;i<controls.length;i++) {
+		if(!controls[i].x) break;
+		ctx.strokeStyle = i==icontrol ? "#000" : "#999";
+		ctx.strokeRect(controls[i].x,controls[i].y,
+				controls[i].w,controls[i].h);			
+		var string = modules[imodule].obj.getControl(i).getString();
+		ctx.fillText(string,
+				controls[i].x+controls[i].w/2,controls[i].y+14);
+	}
+
+	ctx.restore();
+
+	function drawHelpLine(line,x,y) {
+		if(!line) return;
+		line = line.replace("{0}",placeholder)
+			.replace("{1}",placeholder)		
+			.replace("{2}",placeholder)
+			.replace("{3}",placeholder);
+			
+		var len = ctx.measureText(line).width;	
+		var start = x-len/2;
+		//ctx.fillText(line,start,y);
+
+		var placelen = ctx.measureText(placeholder).width;
+
+		var temp = line;
+		while(1) {
+			var k = temp.indexOf(placeholder);
+			if(k<0) break;
+			var chunk = temp.substring(0,k);
+			var l = ctx.measureText(chunk).width;
+			ctx.fillText(chunk,start,y);
+			start += l;
+			ictrl++;
+			controls[ictrl].x = start;
+			controls[ictrl].y = y-14;
+			controls[ictrl].w = placelen;
+			controls[ictrl].h = 20;
+			controls[ictrl].mindex = imodule;
+			start += placelen;
+			temp = temp.substring(k+placeholder.length);
+		}
+		ctx.fillText(temp,start,y);
+	}
+
+}
+
+// ************************************************************************
+
+function clearControls() {
+
+	icontrol = -1;
+	for(var i=0;i<controls.length;i++)
+		controls[i] = {};
+
+}
+
+// ************************************************************************
+
+function inRect(x,y,rx,ry,rw,rh) {
+
+	if(x<rx) return false;
+	if(x>rx+rw) return false;
+	if(y<ry) return false;
+	if(y>ry+rh) return false;
+	return true;
+
+}
+
+// ************************************************************************
+
+function addLink(link) {
+
+	removeLink(link);
+
+	links.push(link);
+
+}
+
+// ************************************************************************
+
+function removeLink(link) {
+
+	// remove overlapping links
+	if(links.length>0)
+	for(var i=links.length-1;i>=0;i--) {
+		if(links[i].from==link.from)
+			links.splice(i,1);
+		else if((links[i].to==link.to)&&(links[i].part==link.part))
+			links.splice(i,1);
+	}
+	
+}
+
+// ************************************************************************
+
+function getPaletteModule(xclick,yclick) {
+
+	if(xclick>wpalette) return;
+	if(yclick>hpalette) return;
+
+	var module = null;
+	var y = 0;
+
+	f("Frame");
+	f("Image");
+	f("Warp");
+	f("Effect");
+	f("Display");
+
+	return module;
+
+	function f(type) {
+		if(module) return;
+		var n = TYPES[type].modules.length;
+		if((yclick>y+20)&&(yclick<y+20+20*n)) {
+			var k = ((yclick-y-20)/20)|0;
+			module = {type:type,name:TYPES[type].modules[k]};
+		}
+		y += 20 + n*20;
+	}
+}
+
+// ************************************************************************
+
+function getWorkspaceModule(xclick,yclick) {
+
+	for(var i=0;i<modules.length;i++) {
+		var module = modules[i];
+		if(xclick < module.x-5 - wmodule/2) continue;
+		if(xclick > module.x+5 + wmodule/2) continue;
+		if(yclick < module.y - hmodule/2) continue;
+		if(yclick > module.y + hmodule/2) continue;
+		return i;
+	}
+}
+
+// ************************************************************************
+
+function getModulePart(xclick,yclick,module) {
+
+	// in provider 
+	if(xclick<module.x - wmodule/2 +5) {
+		if(module.obj.valueProviders==1)
+			return -1;
+		else if(module.obj.pointProviders==1)
+			return -1;
+		else if(module.obj.valueProviders==2)
+			return yclick < module.y ? -1 : -2;
+		else if(module.obj.pointProviders==2)
+			return yclick < module.y ? -1 : -2;
+	}
+
+	// in producer
+	if(xclick>module.x + wmodule/2 -5) return 1;	// producer;
+
+	return 0;
+}
+
+// ************************************************************************
+
+function getHelpControl(xclick,yclick) {
+
+	for(var i=0;i<controls.length;i++) {
+		var c = controls[i];
+		if(!c.x) continue;
+		if(xclick < c.x) continue;
+		if(xclick > c.x + c.w) continue;
+		if(yclick < c.y) continue;
+		if(yclick > c.y + c.h) continue;
+		return i;
+	}
+
+	return -1;
+}
+
+// ************************************************************************
+
+function run() {
+
+	var display =  null;
+	for(var i=0;i<modules.length;i++)
+		if(modules[i].type=="Display")
+			display = modules[i];
+
+	if(!display) return;
+
+	for(var i=0;i<modules.length;i++)
+		modules[i].obj.clearProviders();
+
+	// setup links	
+	for(var i=0;i<links.length;i++) {
+		var obj1 = modules[links[i].from].obj;
+		var obj2 = modules[links[i].to].obj;
+		obj2.setProvider(-links[i].part-1,obj1);
+	}
+
+	if(!checkLinks(display.obj)) return;
+
+	display.obj.run();
+
+	var pixels = display.obj.getPixels();
+	window.mypixels = pixels;
+
+	var canvas = document.createElement("canvas");
+	canvas.width = 500;
+	canvas.height = 500;
+	var ctx = canvas.getContext("2d");
+	ctx.fillStyle = "red";
+	ctx.fillRect(0,0,canvas.width,canvas.height);
+
+	var imgdata = ctx.getImageData(0,0,canvas.width,canvas.height);
+	var k = 0;
+	for(var y=0;y<canvas.height;y++) {
+		for(var x=0;x<canvas.width;x++) {
+			k = canvas.width*y+x;
+			imgdata.data[4*k] = (pixels[k]*256)|0;		// red
+			imgdata.data[4*k+1] = (pixels[k]*256)|0;
+			imgdata.data[4*k+2] = (pixels[k]*256)|0;
+		}
+	}
+
+	var options = "width=510;height=510;toolbar=no;scrollbars=no";
+	var w = window.open("","display",options);
+		
+	var script = w.document.createElement("script");
+	script.innerText = document.querySelector("script#display").innerText;
+	w.document.body.appendChild(script);
+
+	setTimeout( function() { window.remoteupdate( imgdata ); },0);
+}
+
+// ************************************************************************
+
+
+function checkLinks(obj) {
+
+	// graph must start with FIFrame modules
+
+	var n = obj.pointProviders || obj.valueProviders || 0;
+
+	if(n==0)
+		return (obj instanceof FIFrame);
+
+	var ok = true;
+	for(var i=0;i<n;i++) {
+		if(obj.getProvider(i)) {
+			if(!checkLinks(obj.getProvider(i))) 
+				ok = false;
+		}
+		else
+			ok = false;
+	}
+
+	return ok;
+}
+
+// ************************************************************************
+
+function hsv(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return	"rgb("+
+        Math.round(r * 255) +","+
+        Math.round(g * 255) +","+
+        Math.round(b * 255)+")";
+}
+</script>
+</html>
