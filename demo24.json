@@ -1,0 +1,240 @@
+[
+{
+"type": "Frame",
+"name": "Square",
+"id": "fr1",
+"x": 276,
+"y": 35,
+"controls": [
+"20"
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im1",
+"x": 104,
+"y": 94,
+"controls": [
+"2",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im2",
+"x": 500,
+"y": 96,
+"controls": [
+"2",
+"1"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im3",
+"x": 216,
+"y": 94,
+"controls": [
+"0",
+"1"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im4",
+"x": 374,
+"y": 95,
+"controls": [
+"0",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef1",
+"x": 128,
+"y": 144,
+"controls": [
+"0"
+],
+"providers": [
+1,
+3
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef2",
+"x": 475,
+"y": 146,
+"controls": [
+"0"
+],
+"providers": [
+4,
+2
+]
+},
+{
+"type": "Effect",
+"name": "Monadic",
+"id": "ef3",
+"x": 128,
+"y": 190,
+"controls": [
+"2"
+],
+"providers": [
+5
+]
+},
+{
+"type": "Effect",
+"name": "Monadic",
+"id": "ef4",
+"x": 475,
+"y": 195,
+"controls": [
+"2"
+],
+"providers": [
+6
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef5",
+"x": 153,
+"y": 239,
+"controls": [
+"0"
+],
+"providers": [
+7,
+4
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef6",
+"x": 450,
+"y": 246,
+"controls": [
+"0"
+],
+"providers": [
+3,
+8
+]
+},
+{
+"type": "Effect",
+"name": "Monadic",
+"id": "ef7",
+"x": 153,
+"y": 286,
+"controls": [
+"2"
+],
+"providers": [
+9
+]
+},
+{
+"type": "Effect",
+"name": "Monadic",
+"id": "ef8",
+"x": 451,
+"y": 295,
+"controls": [
+"2"
+],
+"providers": [
+10
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef9",
+"x": 298,
+"y": 368,
+"controls": [
+"1"
+],
+"providers": [
+15,
+16
+]
+},
+{
+"type": "Display",
+"name": "Screen",
+"id": "di1",
+"x": 155,
+"y": 443,
+"providers": [
+17
+]
+},
+{
+"type": "Effect",
+"name": "Monadic",
+"id": "ef10",
+"x": 154,
+"y": 335,
+"controls": [
+"8"
+],
+"providers": [
+11
+]
+},
+{
+"type": "Effect",
+"name": "Monadic",
+"id": "ef11",
+"x": 451,
+"y": 342,
+"controls": [
+"8"
+],
+"providers": [
+12
+]
+},
+{
+"type": "Effect",
+"name": "Affine",
+"id": "ef12",
+"x": 301,
+"y": 414,
+"controls": [
+"0.5",
+"0.5"
+],
+"providers": [
+13
+]
+}
+]

@@ -53,7 +53,7 @@ var MOVE_MODULE = ++ACTION;
 var DRAW_BACKLINK = ++ACTION;
 var DRAW_FORLINK = ++ACTION;
 var PRESS_RUN = ++ACTION;
-
+var SCROLL = ++ACTION;
 
 var TYPES = {
 	"Frame":{color:hsv(0,0.4,1),modules:["Square"]},
@@ -147,7 +147,11 @@ function ondown(event) {
 	}
 
 	icontrol = getHelpControl(xclick,yclick);
-	draw();
+	if(icontrol>=0) {
+		draw();
+	}
+
+	state = {action:SCROLL};
 	
 }
 
@@ -166,6 +170,15 @@ function onmove(event) {
 		var module = modules[state.index];
 		module.x += (xmove-xclick);
 		module.y += (ymove-yclick);
+		xclick = xmove;
+		yclick = ymove;
+	}
+
+	if(state && state.action == SCROLL) {
+		for(var i=0;i<modules.length;i++) {
+			modules[i].x += (xmove-xclick);
+			modules[i].y += (ymove-yclick);
+		}
 		xclick = xmove;
 		yclick = ymove;
 	}

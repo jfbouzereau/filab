@@ -36,7 +36,11 @@ to the work space.
 * To set a link between two modules, click on one connector and drag a line to another one. Round connectors represent 2D points. Square connectors
 represent gray level values. You can only set a link between connectors of the same nature.
 
+![config24](config24.png)
+
 * When the graph is ready, click the `Run` button.
+
+![result24](result24.png)
 
 ## EXPORT
 

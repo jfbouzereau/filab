@@ -146,7 +146,7 @@ function FIControlMonadic() {
 	FIControlList.call(self,["1 *","1 /","sin","cos","tan","exp","log",
 		"sqrt","floor","frac","abs","asin","acos","atan"]);
 
-	self.compute = function(a) {
+	self.compute = function(x) {
 		switch(self.getValue()) {
 			case 0 : return x;
 			case 1 : return 1/x;
@@ -254,6 +254,7 @@ function FIFrameSquare() {
 	self.pointProducers = 1;
 
 	self.getPoint = function(_context) {
+		//console.log("FRAME SQUARE "+_context);
 		var width = self.getControl(0).getValue();
 		if(_context.iter==0) {
 			_context.xmin = _context.ymin = -width/2;
@@ -297,8 +298,9 @@ function FIEffectAffine() {
 	self.valueProviders = 1;
 	self.valueProducers = 1;
 	
-	self.getValue = function() {
-		var v = self.getProvider(0).getValue();
+	self.getValue = function(_context) {
+		//console.log("EFFECT AFFINE "+_context);
+		var v = self.getProvider(0).getValue(_context);
 		return self.getControl(0).getValue()*v + 
 				self.getControl(1).getValue();	
 	}
@@ -393,9 +395,10 @@ function FIEffectDiadic() {
 	self.valueProducers = 1;
 
 	self.getValue = function(_context) {
+		//console.log("EFFECT DIADIC "+_context);
 		var v1 = self.getProvider(0).getValue(_context);
 		var v2 = self.getProvider(1).getValue(_context);
-		return self.getControl(0).compute(v1,b2);	
+		return self.getControl(0).compute(v1,v2);
 	}
 	
 		
@@ -713,7 +716,7 @@ function FIImageInterpol() {
 
 		var coord = self.getProvider(0).getPoint(_context);	
 		var xratio = (coord[0]-context.xmin)/(context.xmax-context.xmin);
-		var yratio = (coord[1]-content.ymin)/(context.ymax-context.ymin);
+		var yratio = (coord[1]-context.ymin)/(context.ymax-context.ymin);
 
 		var cnw = self.getControl(0).getValue();
 		var cne = self.getControl(1).getValue();
@@ -748,6 +751,7 @@ function FIImageMonadic() {
 	self.valueProducers = 1;
 
 	self.getValue = function(_context) {
+		//console.log("IMAGE MONADIC "+_context);
 		var coord = self.getProvider(0).getPoint(_context);
 		var arg = self.getControl(1).compute(coord);
 
