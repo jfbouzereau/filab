@@ -1,0 +1,196 @@
+[
+{
+"type": "Frame",
+"name": "Square",
+"id": "fr1",
+"x": 258,
+"y": 46,
+"controls": [
+"7"
+]
+},
+{
+"type": "Image",
+"name": "Parity",
+"id": "im1",
+"x": 402,
+"y": 241,
+"controls": [
+"0",
+"0"
+],
+"providers": [
+6
+]
+},
+{
+"type": "Image",
+"name": "Parity",
+"id": "im2",
+"x": 536,
+"y": 241,
+"controls": [
+"1",
+"0"
+],
+"providers": [
+6
+]
+},
+{
+"type": "Effect",
+"name": "Xor",
+"id": "ef1",
+"x": 453,
+"y": 303,
+"providers": [
+1,
+2
+]
+},
+{
+"type": "Display",
+"name": "Screen",
+"id": "di1",
+"x": 274,
+"y": 428,
+"providers": [
+14
+]
+},
+{
+"type": "Warp",
+"name": "Polar",
+"id": "wa1",
+"x": 468,
+"y": 119,
+"providers": [
+0
+]
+},
+{
+"type": "Warp",
+"name": "Affine",
+"id": "wa2",
+"x": 462,
+"y": 173,
+"controls": [
+"1",
+"1",
+"0.0",
+"10",
+"3.14",
+"0.0"
+],
+"providers": [
+5
+]
+},
+{
+"type": "Image",
+"name": "Parity",
+"id": "im3",
+"x": 58,
+"y": 125,
+"controls": [
+"0",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Parity",
+"id": "im4",
+"x": 115,
+"y": 204,
+"controls": [
+"1",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Effect",
+"name": "Xor",
+"id": "ef2",
+"x": 85,
+"y": 299,
+"providers": [
+7,
+8
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im5",
+"x": 256,
+"y": 241,
+"controls": [
+"2",
+"0"
+],
+"providers": [
+13
+]
+},
+{
+"type": "Effect",
+"name": "Affine",
+"id": "ef3",
+"x": 258,
+"y": 301,
+"controls": [
+"0.5",
+"0.5"
+],
+"providers": [
+10
+]
+},
+{
+"type": "Warp",
+"name": "Polar",
+"id": "wa3",
+"x": 259,
+"y": 120,
+"providers": [
+0
+]
+},
+{
+"type": "Warp",
+"name": "Affine",
+"id": "wa4",
+"x": 258,
+"y": 177,
+"controls": [
+"10",
+"3.14",
+"0.0",
+"1.0",
+"1.0",
+"0.0"
+],
+"providers": [
+12
+]
+},
+{
+"type": "Effect",
+"name": "Merge",
+"id": "ef4",
+"x": 274,
+"y": 372,
+"providers": [
+9,
+11,
+3
+]
+}
+]

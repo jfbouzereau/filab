@@ -1,0 +1,61 @@
+[
+{
+"type": "Frame",
+"name": "Square",
+"id": "fr1",
+"x": 276,
+"y": 48,
+"controls": [
+"30"
+]
+},
+{
+"type": "Image",
+"name": "Parity",
+"id": "im1",
+"x": 218,
+"y": 171,
+"controls": [
+"0",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Parity",
+"id": "im2",
+"x": 383,
+"y": 176,
+"controls": [
+"2",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Effect",
+"name": "Xor",
+"id": "ef1",
+"x": 311,
+"y": 280,
+"providers": [
+1,
+2
+]
+},
+{
+"type": "Display",
+"name": "Screen",
+"id": "di1",
+"x": 311,
+"y": 379,
+"providers": [
+3
+]
+}
+]

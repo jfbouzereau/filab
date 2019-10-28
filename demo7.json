@@ -1,0 +1,97 @@
+[
+{
+"type": "Frame",
+"name": "Square",
+"id": "fr1",
+"x": 292,
+"y": 26,
+"controls": [
+"20"
+]
+},
+{
+"type": "Image",
+"name": "Parity",
+"id": "im1",
+"x": 209,
+"y": 160,
+"controls": [
+"2",
+"0"
+],
+"providers": [
+3
+]
+},
+{
+"type": "Display",
+"name": "Screen",
+"id": "di1",
+"x": 295,
+"y": 315,
+"providers": [
+6
+]
+},
+{
+"type": "Warp",
+"name": "Affine",
+"id": "wa1",
+"x": 209,
+"y": 85,
+"controls": [
+"1",
+"1",
+"-2.5",
+"1",
+"1",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Warp",
+"name": "Affine",
+"id": "wa2",
+"x": 362,
+"y": 89,
+"controls": [
+"1",
+"1",
+"2.5",
+"1",
+"1",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Parity",
+"id": "im2",
+"x": 360,
+"y": 167,
+"controls": [
+"2",
+"0"
+],
+"providers": [
+4
+]
+},
+{
+"type": "Effect",
+"name": "Xor",
+"id": "ef1",
+"x": 297,
+"y": 238,
+"providers": [
+1,
+5
+]
+}
+]

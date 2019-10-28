@@ -1,0 +1,103 @@
+[
+{
+"type": "Frame",
+"name": "Square",
+"id": "fr1",
+"x": 286,
+"y": 23,
+"controls": [
+"20"
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im1",
+"x": 147,
+"y": 89,
+"controls": [
+"2",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im2",
+"x": 461,
+"y": 96,
+"controls": [
+"2",
+"1"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Effect",
+"name": "Affine",
+"id": "ef1",
+"x": 147,
+"y": 150,
+"controls": [
+"0.5",
+"0.5"
+],
+"providers": [
+1
+]
+},
+{
+"type": "Effect",
+"name": "Affine",
+"id": "ef2",
+"x": 396,
+"y": 219,
+"controls": [
+"0.5",
+"0.5"
+],
+"providers": [
+2
+]
+},
+{
+"type": "Display",
+"name": "Screen",
+"id": "di1",
+"x": 333,
+"y": 408,
+"providers": [
+7
+]
+},
+{
+"type": "Effect",
+"name": "Affine",
+"id": "ef3",
+"x": 251,
+"y": 181,
+"controls": [
+"-1",
+"1"
+],
+"providers": [
+3
+]
+},
+{
+"type": "Effect",
+"name": "And",
+"id": "ef4",
+"x": 332,
+"y": 311,
+"providers": [
+6,
+4
+]
+}
+]

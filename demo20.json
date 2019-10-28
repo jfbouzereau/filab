@@ -1,0 +1,89 @@
+[
+{
+"type": "Frame",
+"name": "Square",
+"id": "fr1",
+"x": 260,
+"y": 49,
+"controls": [
+"20"
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im1",
+"x": 156,
+"y": 126,
+"controls": [
+"2",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Effect",
+"name": "Affine",
+"id": "ef1",
+"x": 163,
+"y": 208,
+"controls": [
+"0.5",
+"0.5"
+],
+"providers": [
+1
+]
+},
+{
+"type": "Display",
+"name": "Screen",
+"id": "di1",
+"x": 281,
+"y": 354,
+"providers": [
+6
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im2",
+"x": 327,
+"y": 136,
+"controls": [
+"3",
+"1"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Effect",
+"name": "Affine",
+"id": "ef2",
+"x": 335,
+"y": 211,
+"controls": [
+"0.5",
+"0.5"
+],
+"providers": [
+4
+]
+},
+{
+"type": "Effect",
+"name": "Xor",
+"id": "ef3",
+"x": 276,
+"y": 297,
+"providers": [
+2,
+5
+]
+}
+]

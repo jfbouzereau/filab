@@ -1,0 +1,99 @@
+[
+{
+"type": "Frame",
+"name": "Square",
+"id": "fr1",
+"x": 296,
+"y": 33,
+"controls": [
+"20"
+]
+},
+{
+"type": "Image",
+"name": "Monadic",
+"id": "im1",
+"x": 307,
+"y": 262,
+"controls": [
+"2",
+"1"
+],
+"providers": [
+5
+]
+},
+{
+"type": "Display",
+"name": "Screen",
+"id": "di1",
+"x": 308,
+"y": 429,
+"providers": [
+6
+]
+},
+{
+"type": "Warp",
+"name": "Monadic",
+"id": "wa1",
+"x": 390,
+"y": 89,
+"controls": [
+"2",
+"0",
+"0",
+"0"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Warp",
+"name": "Matrix",
+"id": "wa2",
+"x": 392,
+"y": 136,
+"controls": [
+"1",
+"1",
+"0",
+"1",
+"0",
+"1",
+"1",
+"1",
+"1",
+"0"
+],
+"providers": [
+3
+]
+},
+{
+"type": "Warp",
+"name": "Merge",
+"id": "wa3",
+"x": 298,
+"y": 187,
+"providers": [
+0,
+4
+]
+},
+{
+"type": "Effect",
+"name": "Diadic",
+"id": "ef1",
+"x": 307,
+"y": 351,
+"controls": [
+"2"
+],
+"providers": [
+1,
+1
+]
+}
+]

@@ -1,0 +1,34 @@
+[
+{
+"type": "Frame",
+"name": "Square",
+"x": 277,
+"y": 82,
+"controls": [
+"10"
+]
+},
+{
+"type": "Image",
+"name": "Parity",
+"x": 286,
+"y": 148,
+"controls": [
+"x",
+"even"
+],
+"providers": [
+0
+]
+},
+{
+"type": "Display",
+"name": "Screen",
+"x": 286,
+"y": 231,
+"controls": [],
+"providers": [
+1
+]
+}
+]

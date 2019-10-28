@@ -40,10 +40,6 @@ represent gray level values. You can only set a link between connectors of the s
 
 * When the graph is ready, click the `Run` button.
 
-![result24](result24.png)
-
-![result23](result23.png)
-
 ## EXPORT
 
 You can export the graph into a json file.
@@ -52,4 +48,24 @@ You can export the graph into a json file.
 
 You can import a json file, by dropping it to from the computer desktop to the workspace.
 
+
+## SOME RESULTS
+
+* demo 5
+![result5](result5.png)
+
+* demo 6
+![result6](result6.png)
+
+* demo 7
+![result7](result7.png)
+
+* demo 10
+![result10](result10.png)
+
+* demo 23
+![result23](result23.png)
+
+* demo 24
+![result24](result24.png)
 

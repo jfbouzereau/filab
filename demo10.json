@@ -1,0 +1,62 @@
+[
+{
+"type": "Frame",
+"name": "Square",
+"id": "fr1",
+"x": 256,
+"y": 38,
+"controls": [
+"10"
+]
+},
+{
+"type": "Warp",
+"name": "Polar",
+"id": "wa1",
+"x": 254,
+"y": 106,
+"providers": [
+0
+]
+},
+{
+"type": "Image",
+"name": "Parity",
+"id": "im1",
+"x": 252,
+"y": 263,
+"controls": [
+"0",
+"0"
+],
+"providers": [
+4
+]
+},
+{
+"type": "Display",
+"name": "Screen",
+"id": "di1",
+"x": 250,
+"y": 344,
+"providers": [
+2
+]
+},
+{
+"type": "Warp",
+"name": "Monadic",
+"id": "wa2",
+"x": 253,
+"y": 180,
+"controls": [
+"5",
+"0",
+"0",
+"0"
+],
+"providers": [
+1
+]
+}
+]
