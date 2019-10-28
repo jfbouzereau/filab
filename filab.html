@@ -89,7 +89,7 @@ var hpalette = 0;
 var hhelp = 100;
 
 var wmodule = 80;
-var hmodule = 20;
+var hmodule = 24;
 
 var wbutton = 100
 var hbutton = 30;
@@ -464,15 +464,15 @@ function draw() {
 			var module1 = modules[links[i].from];		
 			var module2 = modules[links[i].to];
 			var part = links[i].part;
-			var x1 = module1.x + wmodule/2;
-			var y1 = module1.y;
-			var x2 = module2.x - wmodule/2;
+			var x1 = module1.x;
+			var y1 = module1.y + hmodule/2;
+			var y2 = module2.y - hmodule/2;
 			if((module2.obj.valueProviders==1)||(module2.obj.pointProviders==1))
-				var y2 = module2.y;
+				var x2 = module2.x;
 			else if(part==-1)
-				var y2 = module2.y-8;
+				var x2 = module2.x-18;
 			else if(part==-2)
-				var y2 = module2.y+8;
+				var x2 = module2.x+18;
 
 			ctx.beginPath();
 			ctx.moveTo(x1,y1);
@@ -526,36 +526,36 @@ function draw() {
 
 		if(module.obj.pointProducers==1) {
 			ctx.beginPath();
-			ctx.arc(module.x+wmodule/2, module.y,5,0,Math.PI*2);
+			ctx.arc(module.x,module.y+hmodule/2,5,0,Math.PI*2);
 			ctx.fill();
 		}
 		
 		if(module.obj.pointProviders==1) {
 			ctx.beginPath();
-			ctx.arc(module.x-wmodule/2,module.y,5,0,Math.PI*2);
+			ctx.arc(module.x,module.y-hmodule/2,5,0,Math.PI*2);
 			ctx.fill();
 		}
 
 		if(module.obj.pointProviders==2) {
 			ctx.beginPath();
 			ctx.beginPath();
-			ctx.arc(module.x-wmodule/2,module.y-8,5,0,Math.PI*2);
+			ctx.arc(module.x-18,module.y-hmodule/2,5,0,Math.PI*2);
 			ctx.fill();
-			ctx.arc(module.x-wmodule/2,module.y+8,5,0,Math.PI*2);
+			ctx.arc(module.x+18,module.y-hmodule/2,5,0,Math.PI*2);
 			ctx.fill();
 		}
 
 		if(module.obj.valueProducers==1) {
-			ctx.fillRect(module.x+wmodule/2-5,module.y-5,10,10);
+			ctx.fillRect(module.x-5,module.y+hmodule/2-5,10,10);
 		}
 
 		if(module.obj.valueProviders==1) {
-			ctx.fillRect(module.x-wmodule/2-5,module.y-5,10,10);
+			ctx.fillRect(module.x-5,module.y-hmodule/2-5,10,10);
 		}
 	
 		if(module.obj.valueProviders==2) {
-			ctx.fillRect(module.x-wmodule/2-5,module.y-5-8,10,10);
-			ctx.fillRect(module.x-wmodule/2-5,module.y-5+8,10,10);
+			ctx.fillRect(module.x-18-5,module.y-hmodule/2-5,10,10);
+			ctx.fillRect(module.x+18-5,module.y-hmodule/2-5,10,10);
 		}
 	}
 }
@@ -657,10 +657,7 @@ function drawHelp() {
 
 	function drawHelpLine(line,x,y) {
 		if(!line) return;
-		line = line.replace("{0}",placeholder)
-			.replace("{1}",placeholder)		
-			.replace("{2}",placeholder)
-			.replace("{3}",placeholder);
+		line = line.replace(/{[0-9]}/g,placeholder)
 			
 		var len = ctx.measureText(line).width;	
 		var start = x-len/2;
@@ -729,9 +726,7 @@ function removeLink(link) {
 	// remove overlapping links
 	if(links.length>0)
 	for(var i=links.length-1;i>=0;i--) {
-		if(links[i].from==link.from)
-			links.splice(i,1);
-		else if((links[i].to==link.to)&&(links[i].part==link.part))
+		if((links[i].to==link.to)&&(links[i].part==link.part))
 			links.splice(i,1);
 	}
 	
@@ -772,10 +767,10 @@ function getWorkspaceModule(xclick,yclick) {
 
 	for(var i=0;i<modules.length;i++) {
 		var module = modules[i];
-		if(xclick < module.x-5 - wmodule/2) continue;
-		if(xclick > module.x+5 + wmodule/2) continue;
-		if(yclick < module.y - hmodule/2) continue;
-		if(yclick > module.y + hmodule/2) continue;
+		if(xclick < module.x - wmodule/2) continue;
+		if(xclick > module.x + wmodule/2) continue;
+		if(yclick < module.y-8 - hmodule/2) continue;
+		if(yclick > module.y+8 + hmodule/2) continue;
 		return i;
 	}
 }
@@ -785,19 +780,19 @@ function getWorkspaceModule(xclick,yclick) {
 function getModulePart(xclick,yclick,module) {
 
 	// in provider 
-	if(xclick<module.x - wmodule/2 +5) {
+	if(yclick<module.y - hmodule/2 + 8) {
 		if(module.obj.valueProviders==1)
 			return -1;
 		else if(module.obj.pointProviders==1)
 			return -1;
 		else if(module.obj.valueProviders==2)
-			return yclick < module.y ? -1 : -2;
+			return xclick < module.x ? -1 : -2;
 		else if(module.obj.pointProviders==2)
-			return yclick < module.y ? -1 : -2;
+			return xclick < module.x ? -1 : -2;
 	}
 
 	// in producer
-	if(xclick>module.x + wmodule/2 -5) return 1;	// producer;
+	if(yclick>module.y + hmodule/2-8) return 1;
 
 	return 0;
 }

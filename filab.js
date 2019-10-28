@@ -69,15 +69,19 @@ function FIControlList(_list) {
 	}
 
 	self.setValue = function(_value) {
-	
+
 		if(typeof(_value)=="number") {
 			choice = _value|0;
 			if(choice<0) choice = 0;
 			else if(choice>=list.length) choice = 0;	
 			}
 		else if(typeof(_value)=="string") {
-			choice = list.indexOf(_value);
+			if(_value.match(/^[0-9]+$/))
+				choice = parseInt(_value);
+			else
+				choice = list.indexOf(_value);
 			if(choice<0) choice = 0;
+			if(choice>=list.length) choice = 0;
 		}
 	}
 
