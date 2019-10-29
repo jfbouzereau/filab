@@ -85,6 +85,9 @@ function FIControlList(_list) {
 		}
 	}
 
+	self.getStrings = function() {
+		return list;
+	}
 }
 
 FIControlList.prototype = Object.create(FIControl.prototype);

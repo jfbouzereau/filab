@@ -54,7 +54,9 @@ var DRAW_BACKLINK = ++ACTION;
 var DRAW_FORLINK = ++ACTION;
 var PRESS_RUN = ++ACTION;
 var PRESS_EXPORT = ++ACTION;
+var PRESS_CONTROL = ++ACTION;
 var SCROLL = ++ACTION;
+
 
 var TYPES = {
 	"Frame":{color:hsv(0,0.4,1),modules:["Square"]},
@@ -140,7 +142,6 @@ function ondown(event) {
 		else if(part>0) {
 			state = {action:DRAW_FORLINK,index:index};
 		}
-
 		return;
 	}	
 
@@ -158,6 +159,12 @@ function ondown(event) {
 
 	icontrol = getHelpControl(xclick,yclick);
 	if(icontrol>=0) {
+		controls[icontrol].selected = true;
+		var ctrl = modules[imodule].obj.getControl(icontrol);
+		if(ctrl instanceof FIControlList) {
+			var list = modules[imodule].obj.getControl(icontrol).getStrings();
+			state = {action:PRESS_CONTROL,list:list,choice:-1};
+		}
 		draw();
 	}
 
@@ -275,6 +282,11 @@ function onup(event) {
 		setTimeout(exportConfig,0);
 	}
 
+	if((state.action==PRESS_CONTROL)&&(state.choice>=0)) {
+		var ctrl = modules[imodule].obj.getControl(icontrol).setValue(state.choice);	
+			
+	}
+
 	state = null;
 
 	draw();
@@ -304,6 +316,13 @@ function onkey(event) {
 	}
 	else {
 		var string = ctl.getString();
+
+		// if just selected, clear old content
+		if(controls[icontrol].selected) {
+			string = "";
+			delete(controls[icontrol].selected)
+		}
+
 		if(event.keyCode==8) 
 			string = string.substring(0,string.length-1);
 		else if(event.key.match(/[0123456789.-]/))
@@ -469,12 +488,13 @@ function draw() {
 		drawModule(state);
 	}
 
-	drawHelp();
 
 	if(state && ((state.action==DRAW_BACKLINK)||(state.action==DRAW_FORLINK)))
 		drawLink();
 	
 	drawLinks();
+
+	drawHelp();
 
 	rrun.x = workspace.width - rrun.w - 20;
 	rrun.y = workspace.height - 5*hhelp/7 - rrun.h/2;
@@ -686,6 +706,9 @@ function drawHelp() {
 				controls[i].x+controls[i].w/2,controls[i].y+14);
 	}
 
+	if(state && state.action==PRESS_CONTROL) 
+		drawControlMenu();
+
 	ctx.restore();
 
 	function drawHelpLine(line,x,y) {
@@ -716,6 +739,39 @@ function drawHelp() {
 			temp = temp.substring(k+placeholder.length);
 		}
 		ctx.fillText(temp,start,y);
+	}
+
+	function drawControlMenu() {
+
+		var ctrl = controls[icontrol];
+
+		var nitems = state.list.length;
+		
+		var r = {x:ctrl.x,y:ctrl.y-nitems*ctrl.h,w:ctrl.w,h:ctrl.h};
+
+		var choice = -1;
+
+		for(var i=0;i<state.list.length;i++) {
+			if(inRect(xmove,ymove,r))  {
+				ctx.fillStyle = "#666";
+				ctx.fillRect(r.x,r.y,r.w,r.h);
+				ctx.fillStyle = "white";
+				ctx.fillText(state.list[i],r.x+r.w/2,r.y+14);
+				choice = i;
+			}
+			else {
+				ctx.fillStyle = "white";
+				ctx.fillRect(r.x,r.y,r.w,r.h);
+				ctx.fillStyle = "#666";
+				ctx.fillText(state.list[i],r.x+r.w/2,r.y+14);
+			}		
+			ctx.strokeStyle = "#666";
+			ctx.strokeRect(r.x,r.y,r.w,r.h);
+			r.y += ctrl.h;
+		}
+
+		if(choice!=state.ichoice)
+			state.choice = choice;
 	}
 
 }
