@@ -37,7 +37,9 @@ body {
 
 	var ctx = canvas.getContext("2d");
 
-	window.opener.remoteupdate = function(imgdata) {
+	window.opener.setImageData = function(size,imgdata) {
+		canvas.width = size;
+		canvas.height = size;
 		ctx.putImageData(imgdata,0,0);
 	}
 
@@ -949,7 +951,9 @@ function run() {
 		script.innerText = document.querySelector("script#display").innerText;
 		w.document.body.appendChild(script);
 
-		setTimeout( function() { window.remoteupdate( imgdata ); },0);
+		
+		setTimeout( function() { window.setImageData( width,imgdata ); } , 0);
+
 		}
 
 	if(display.obj instanceof FIDisplayFile) {
