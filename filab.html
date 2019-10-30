@@ -74,6 +74,8 @@ var TYPES = {
 
 // ************************************************************************
 
+CanvasRenderingContext2D.prototype.roundRect = roundRect;
+
 var workspace = document.querySelector("#workspace");
 var ctx = workspace.getContext("2d");
 
@@ -136,6 +138,8 @@ function ondown(event) {
 	if(index>=0) {
 		var part = getModulePart(xclick,yclick,modules[index]);
 		if(part==0) {
+			imodule = index;
+			clearControls();
 			state = {action:MOVE_MODULE,index:index};
 			}
 		else if(part<0) {
@@ -171,6 +175,7 @@ function ondown(event) {
 		return;
 	}
 
+	imodule = -1;
 	state = {action:SCROLL};
 	
 }
@@ -234,12 +239,6 @@ function onup(event) {
 		}
 	}
 
-	if(state.action == MOVE_MODULE) {
-		if(state.index != imodule ) {
-			imodule = state.index;
-			clearControls();
-		}
-	}
 
 	if(state.action == DRAW_BACKLINK) {
 		var jmodule = getWorkspaceModule(xmove,ymove);
@@ -483,12 +482,12 @@ function draw() {
 	drawPalette();
 
 	for(var i=0;i<modules.length;i++) 
-		drawModule(modules[i]);
+		drawModule(modules[i],i==imodule);
 
 	if(state && state.action==ADD_MODULE) {
 		state.x = xmove;
 		state.y = ymove;
-		drawModule(state);
+		drawModule(state,true);
 	}
 
 
@@ -551,8 +550,9 @@ function draw() {
 		if(state && (state.action==action) && inb ) 
 			ctx.fillStyle = "#333";
 		else
-			ctx.fillStyle = "#AAA";
-		ctx.fillRect(r.x,r.y,r.w,r.h);
+			ctx.fillStyle = "#BBB";
+		ctx.roundRect(r.x,r.y,r.w,r.h,5);
+		ctx.fill();
 	
 		if(state && (state.action == action)	&& inb) 
 			ctx.fillStyle = "#AAA";
@@ -562,15 +562,15 @@ function draw() {
 		ctx.restore();
 	}
 
-	function drawModule(module) {
+	function drawModule(module,selected) {
 		ctx.textAlign = "center";
 		ctx.font = "14px Sans-Serif";
-		ctx.lineWidth = 0.3;
+		ctx.lineWidth = 0.5;
 
 		ctx.fillStyle = TYPES[module.type].color;
 		ctx.fillRect(module.x-wmodule/2,module.y-hmodule/2,wmodule,hmodule);
 		
-		ctx.strokeStyle = "#666";
+		ctx.strokeStyle = selected ? "black" : "#666";
 		ctx.strokeRect(module.x-wmodule/2,module.y-hmodule/2,wmodule,hmodule);
 
 		ctx.fillStyle = "#666";
@@ -704,15 +704,40 @@ function drawHelp() {
 		ctx.strokeStyle = i==icontrol ? "#000" : "#999";
 		ctx.strokeRect(controls[i].x,controls[i].y,
 				controls[i].w,controls[i].h);			
-		var string = modules[imodule].obj.getControl(i).getString();
+		var ctrl = modules[imodule].obj.getControl(i);
+		var string = ctrl.getString();
 		ctx.fillText(string,
 				controls[i].x+controls[i].w/2,controls[i].y+14);
+		if(ctrl instanceof FIControlList) 
+			drawArrow(controls[i]);
 	}
 
 	if(state && state.action==PRESS_CONTROL) 
 		drawControlMenu();
 
 	ctx.restore();
+
+	function drawArrow(control) {
+		ctx.strokeStyle = "#666";
+		var x = control.x + control.w-10;
+		var y = control.y + control.h/2;
+		ctx.beginPath();
+		/*
+		ctx.moveTo(x-1,y-2);
+		ctx.lineTo(x+1,y-2);
+		*/
+		ctx.moveTo(x-1,y-1);
+		ctx.lineTo(x+1,y-1);
+		ctx.moveTo(x-2,y);
+		ctx.lineTo(x+2,y);
+		ctx.moveTo(x-3,y+1);
+		ctx.lineTo(x+3,y+1);
+		/*	
+		ctx.moveTo(x-5,y+2);
+		ctx.lineTo(x+5,y+2);
+		*/
+		ctx.stroke();
+	}
 
 	function drawHelpLine(line,x,y) {
 		if(!line) return;
@@ -751,6 +776,8 @@ function drawHelp() {
 		var nitems = state.list.length;
 		
 		var r = {x:ctrl.x,y:ctrl.y-nitems*ctrl.h,w:ctrl.w,h:ctrl.h};
+		ctx.strokeStyle = "#666";
+		ctx.strokeRect(r.x,r.y,r.w,r.h*nitems);
 
 		var choice = -1;
 
@@ -768,8 +795,6 @@ function drawHelp() {
 				ctx.fillStyle = "#666";
 				ctx.fillText(state.list[i],r.x+r.w/2,r.y+14);
 			}		
-			ctx.strokeStyle = "#666";
-			ctx.strokeRect(r.x,r.y,r.w,r.h);
 			r.y += ctrl.h;
 		}
 
@@ -1071,6 +1096,26 @@ function getTitle() {
 	var title = document.querySelector("head title");
 	
 	return title ? title.innerText : "Untitled";
+}
+
+// ************************************************************************
+
+function roundRect( x, y, width, height, radius) {
+
+	var self = this;
+
+	self.beginPath();
+	self.moveTo(x + radius, y);
+	self.lineTo(x + width - radius, y);
+	self.quadraticCurveTo(x + width, y, x + width, y + radius);
+	self.lineTo(x + width, y + height - radius);
+	self.quadraticCurveTo(x + width, y + height, x+width - radius, y + height);
+	self.lineTo(x + radius, y + height);
+	self.quadraticCurveTo(x, y + height, x, y + height - radius);
+	self.lineTo(x, y + radius);
+	self.quadraticCurveTo(x, y, x + radius, y);
+	self.closePath();
+
 }
 
 // ************************************************************************

@@ -51,13 +51,13 @@ FIControlNumber.prototype = Object.create(FIControl.prototype);
 
 //****************************************************************************
 
-function FIControlList(_list) {
+function FIControlList(_list,_choice) {
 
 	var self = this;
 
 	FIControl.call(self);
 
-	var choice = 0;
+	var choice = _choice || 0;
 	var list = _list;
 
 	self.getValue = function() {
@@ -1084,7 +1084,7 @@ function FIWarpMonadic() {
 		new FIControlMonadic(),
 		new FIControlList(["oldx","oldy"]),
 		new FIControlMonadic(),
-		new FIControlList(["oldx","oldy"])
+		new FIControlList(["oldx","oldy"],1)
 	]);
 
 	self.help1 = "This module applies monadic functions to the coordinates";
