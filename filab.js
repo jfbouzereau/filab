@@ -192,7 +192,7 @@ function FIControlPoint(withconstant) {
 			case 0 : return coord[0];
 			case 1 : return coord[1];
 			case 2 : return Math.hypot(coord[0],coord[1]);
-			case 3 : return Math.atan(coord[0],coord[1]);
+			case 3 : return Math.atan2(coord[1],coord[0]);
 			case 4 : return constant;
 		}
 	}
@@ -1125,7 +1125,7 @@ function FIWarpPolar() {
 		var coord = self.getProvider(0).getPoint(_context);
 
 		var x = Math.sqrt(coord[0]*coord[0] + coord[1]*coord[1]);
-		var y = Math.atan(coord[0],coord[1]);
+		var y = Math.atan2(coord[1],coord[0]);
 
 		return [x,y];
 	}
@@ -1150,7 +1150,7 @@ function FIWarpRadial() {
 		var coord = self.getProvider(0).getPoint(_context);
 
 		var dist = Math.sqrt(coord[0]*coord[0] + coord[1]*coord[1]);
-		var angle = Math.atan(coord[0],coord[1]);
+		var angle = Math.atan2(coord[1],coord[0]);
 	
 		dist = Math.atan(2*Math.PI*dist/10);
 		
@@ -1202,7 +1202,7 @@ function FIWarpRotate() {
 		var coord = self.getProvider(0).getPoint(_context);
 
 		var dist = Math.sqrt(coord[0]*coord[0] + coord[1]*coord[1]);
-		var angle = Math.atan(coord[0],coord[1]);
+		var angle = Math.atan2(coord[1],coord[0]);
 
 		angle += Math.PI*self.getControl(0).getValue()/180;
 
